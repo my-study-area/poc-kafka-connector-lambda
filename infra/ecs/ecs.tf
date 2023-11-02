@@ -48,7 +48,7 @@ resource "aws_ecs_task_definition" "pkcl-td" {
   container_definitions = <<DEFINITION
     [
       {
-        "name": "${local.name}-td",
+        "name": "${local.name}-zookeeper-td",
         "image": "confluentinc/cp-zookeeper:latest",
         "essential": true,
         "environment": [
@@ -74,13 +74,47 @@ resource "aws_ecs_task_definition" "pkcl-td" {
             "awslogs-stream-prefix": "ecs"
           }
         }
+      },
+      {
+        "name": "${local.name}-kafka-td",
+        "image": "confluentinc/cp-kafka:latest",
+        "essential": true,
+            "environment": [
+          {"name": "KAFKA_BROKER_ID", "value": "1"},
+          {"name": "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "value": "1"},
+          {"name": "KAFKA_ZOOKEEPER_CONNECT", "value": "localhost:2181"},
+          {"name": "KAFKA_INTER_BROKER_LISTENER_NAME", "value": "INTERNAL"},
+          {"name": "KAFKA_LISTENERS", "value": "INTERNAL://:9092,OUTSIDE://:9094"},
+          {"name": "KAFKA_ADVERTISED_LISTENERS", "value": "INTERNAL://localhost:9092,OUTSIDE://host.docker.internal:9094"},
+          {"name": "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "value": "INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT"}
+        ],
+        "portMappings": [
+          {
+            "containerPort": 9094,
+            "hostPort": 9094
+          }
+        ],
+        "dependsOn": [
+          {
+            "condition": "START",
+            "containerName": "${local.name}-zookeeper-td"
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "${aws_cloudwatch_log_group.kafka.name}",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
       }
     ]
     DEFINITION
-  cpu = 256
+  cpu = 1024
   execution_role_arn = resource.aws_iam_role.this.arn
   family = "family-of-pkcl-tasks"
-  memory = 512
+  memory = 3072
   network_mode = "awsvpc"
   requires_compatibilities = ["FARGATE"]
 }
