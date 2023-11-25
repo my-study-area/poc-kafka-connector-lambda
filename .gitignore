@@ -1,8 +1,24 @@
+# js
 node_modules
+
+# terraform
 .terraform
 *terraform.tfstate
 *terraform.tfstate.backup
 *terraform.lock.hcl
+
+# vscode
+*.pyc
+.vscode
+
+# python
+htmlcov
+.coverage
+
+# docker
+automation/volume
+
+# outros
 ecr
 infra/old
 kafka
