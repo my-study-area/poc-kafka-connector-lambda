@@ -1,11 +1,103 @@
 # poc-kafka-connector-lambda
+![GitHub top language](https://img.shields.io/github/languages/top/my-study-area/poc-kafka-connector-lambda)
+![Terraform Version](https://img.shields.io/badge/Terraform-v1.6.4-blue.svg)
+[![Repository size](https://img.shields.io/github/repo-size/my-study-area/poc-kafka-connector-lambda)](https://img.shields.io/github/repo-size/my-study-area/poc-kafka-connector-lambda)
+[![Last commit](https://img.shields.io/github/last-commit/my-study-area/poc-kafka-connector-lambda)](https://github.com/my-study-area/poc-kafka-connector-lambda/commits/master)
+
+
 POC de conector lambda sink
 
+## Pré requisitos
+- docker / docker-compose
+- python
+- aws cli 2.0
+- terraform com [tfenv](https://github.com/tfutils/tfenv) (opcional)
+- terraform-local / [tflocal](https://docs.localstack.cloud/user-guide/integrations/terraform/#install-the-tflocal-wrapper-script) (opcional)
+
+## Executar localmente com a automação
+
+```bash
+# entra no diretório
+cd automation
+
+# inicia os containers
+docker-compose up -d
+
+# inicia o bash do container schema-registry
+docker-compose exec schema-registry bash
+
+# conecta no kafka console producer
+kafka-avro-console-producer \
+  --broker-list localhost:9092 \
+  --topic example-stream-avro \
+  --property key.converter=io.confluent.connect.avro.AvroConverter \
+  --property value.converter=io.confluent.connect.avro.AvroConverter \
+  --property value.converter.schema.registry.url=http://localhost:8081 \
+  --property key.converter.schema.registry.url=http://localhost:8081 \
+  --property value.schema="$(< hello.avsc)" \
+  --property key.schema="$(< key.avsc)" \
+  --property parse.key=true \
+  --property key.separator=,
+
+# exemplo de mensagem avro para adicionar no console
+{"timestamp":1637000000000},{"language": "ENGLISH", "greeting": "Hello, World!"}
+```
+Para visualizar os logs execute num novo terminal:
+```bash
+aws logs tail /aws/lambda/consumer-events --follow --endpoint-url http://localhost:4566
+```
+
+## Identificando problemas na automação
+Verifique se todos os containers estão executando:
+```bash
+docker-compose ps
+```
+
+Configure o profile localstack:
+```bash
+aws configure --profile localstack
+# AWS Access Key ID [local]: 
+# AWS Secret Access Key [local]: 
+# Default region name [us-east-1]: 
+# Default output format [json]:
+```
+
+Verifica se a lambda foi criada:
+```bash
+aws lambda list-functions \
+--query "Functions[].FunctionName" \
+--output text \
+--endpoint-url http://localhost:4566
+```
+
+Em caso de problemas na criação da lambda execute:
+```bash
+# inicializa as configurações do terraform
+tflocal init
+
+# cria a lambda e a role
+tflocal apply -auto-approve
+```
+
+Verifica se o plugin foi adicionado no Kafka connector:
+```bash
+curl http://localhost:8083/connector-plugins | grep LambdaSinkConnector
+```
+
+Verifica se foi criado o conector **connector-consumer-events**:
+```bash
+curl http://localhost:8083/connectors
+```
+
+Verifica o status do conector:
+```bash
+curl http://localhost:8083/connectors/connector-consumer-events/status
+```
 
 ## Anotações
 ```bash
 # lista as lambdas
-aws lambda list-functions --profile sandbox --query "Functions[].[FunctionName]"
+aws lambda list-functions --endpoint-url http://localhost:4566 --query "Functions[].[FunctionName]"
 
 # testa comunicação com kafka
 nc -vz localhost 9092

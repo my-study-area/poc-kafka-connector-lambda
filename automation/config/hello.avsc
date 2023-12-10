@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "Hello",
+  "doc": "An example Avro-encoded `Hello` message.",
+  "namespace": "com.nordstrom.kafka.example",
+  "fields": [
+    {
+      "name": "language",
+      "type": {
+        "type": "enum",
+        "name": "language",
+        "symbols": ["ENGLISH", "FRENCH", "ITALIAN", "SPANISH"]
+      }
+    },
+    {
+      "name": "greeting",
+      "type": "string"
+    }
+  ]
+}

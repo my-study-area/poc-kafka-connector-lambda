@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "Header",
+  "fields": [
+    {
+      "name": "timestamp",
+      "type": "long"
+    }
+  ]
+}
