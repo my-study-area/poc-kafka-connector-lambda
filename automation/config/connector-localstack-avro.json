@@ -16,6 +16,7 @@
     "aws.lambda.batch.enabled": "false",
     "payload.formatter.key.schema.visibility": "none",
     "payload.formatter.value.schema.visibility": "none",
-    "localstack.enabled": "true"
+    "localstack.enabled": "true",
+    "value.converter.value.subject.name.strategy": "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
   }
 }
