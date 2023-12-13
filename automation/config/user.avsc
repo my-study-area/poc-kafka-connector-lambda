@@ -1,15 +1,15 @@
 {
    "namespace": "my.test",
-   "name": "hello",
+   "name": "user",
    "type": "record",
    "fields" : [
      {
-       "name" : "language",
+       "name" : "name",
        "type" : "string"
      },
      {
-       "name" : "greeting",
-       "type" : "string"
+       "name" : "age",
+       "type" : "int"
      }
    ]
 }

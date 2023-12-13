@@ -46,6 +46,7 @@ services:
     volumes:
     - ./config/key.avsc:/home/appuser/key.avsc
     - ./config/hello.avsc:/home/appuser/hello.avsc
+    - ./config/user.avsc:/home/appuser/user.avsc
     network_mode: host
 
   # NB: run connect locally in stand-alone mode to debug

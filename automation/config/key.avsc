@@ -1,10 +1,11 @@
 {
-  "type": "record",
-  "name": "Header",
-  "fields": [
-    {
-      "name": "timestamp",
-      "type": "long"
-    }
-  ]
+   "namespace": "my.test",
+   "name": "key",
+   "type": "record",
+   "fields" : [
+     {
+       "name" : "timestamp",
+       "type" : "long"
+     }
+   ]
 }

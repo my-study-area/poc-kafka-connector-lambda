@@ -23,25 +23,10 @@ cd automation
 # inicia os containers
 docker-compose up -d
 
-# inicia o bash do container schema-registry
-docker-compose exec schema-registry bash
-
-# conecta no kafka console producer
-kafka-avro-console-producer \
-  --broker-list localhost:9092 \
-  --topic example-stream-avro \
-  --property key.converter=io.confluent.connect.avro.AvroConverter \
-  --property value.converter=io.confluent.connect.avro.AvroConverter \
-  --property value.converter.schema.registry.url=http://localhost:8081 \
-  --property key.converter.schema.registry.url=http://localhost:8081 \
-  --property value.schema="$(< hello.avsc)" \
-  --property key.schema="$(< key.avsc)" \
-  --property parse.key=true \
-  --property key.separator=,
-
-# exemplo de mensagem avro para adicionar no console
-{"timestamp":1637000000000},{"language": "ENGLISH", "greeting": "Hello, World!"}
+# cria eventos no tópico Kafka para os schemas user e hello
+python run_local/multi-schema-same-topic-avro-producer.py 
 ```
+
 Para visualizar os logs execute num novo terminal:
 ```bash
 aws logs tail /aws/lambda/consumer-events --follow --endpoint-url http://localhost:4566
@@ -92,6 +77,64 @@ curl http://localhost:8083/connectors
 Verifica o status do conector:
 ```bash
 curl http://localhost:8083/connectors/connector-consumer-events/status
+```
+
+Remove o conector:
+```bash
+curl -XDELETE http://localhost:8083/connectors/connector-consumer-events
+
+```
+Cria o conector:
+```bash
+curl -XPOST -H 'Content-Type: application/json' http://localhost:8083/connectors -d @config/connector-localstack-avro.json
+```
+
+Cria eventos para o Kafka via console Kafka:
+```bash
+# inicia o bash do container schema-registry
+docker-compose exec schema-registry bash
+
+# conecta no kafka console producer
+kafka-avro-console-producer \
+--broker-list localhost:9092 \
+--topic example-stream-avro \
+--property value.converter=io.confluent.connect.avro.AvroConverter \
+--property value.converter.schema.registry.url=http://your_schema_registry:8081 \
+--property value.subject.name.strategy=io.confluent.kafka.serializers.subject.TopicRecordNameStrategy \
+--property value.schema="$(< hello.avsc)" \
+--property key.converter=io.confluent.connect.avro.AvroConverter \
+--property key.converter.schema.registry.url=http://localhost:8081 \
+--property key.schema="$(< key.avsc)" \
+--property key.separator=, \
+--property parse.key=true \
+--property key.separator=, \
+--property parse.key=true
+
+
+# exemplo de mensagem avro hello
+{"timestamp":1637000000000},{"language": "ENGLISH", "greeting": "Hello, World!"}
+
+# abra uma nova janela para iniciar o bash e gerar um evento avro para user
+docker-compose exec schema-registry bash
+
+# conecta no kafka console producer
+kafka-avro-console-producer \
+--broker-list localhost:9092 \
+--topic example-stream-avro \
+--property value.converter=io.confluent.connect.avro.AvroConverter \
+--property value.converter.schema.registry.url=http://your_schema_registry:8081 \
+--property value.subject.name.strategy=io.confluent.kafka.serializers.subject.TopicRecordNameStrategy \
+--property value.schema="$(< user.avsc)" \
+--property key.converter=io.confluent.connect.avro.AvroConverter \
+--property key.converter.schema.registry.url=http://localhost:8081 \
+--property key.schema="$(< key.avsc)" \
+--property key.separator=, \
+--property parse.key=true \
+--property key.separator=, \
+--property parse.key=true
+
+# exemplo de mensagem avro user
+{"timestamp":1637000000000},{"name": "John Doe", "age": 30}
 ```
 
 ## Anotações
