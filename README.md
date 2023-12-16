@@ -25,7 +25,7 @@ cd automation
 docker-compose up -d
 
 # cria eventos no tópico Kafka para os schemas user e hello
-python run_local/multi-schema-same-topic-avro-producer.py 
+python run_local/multi-schema-same-topic-avro-producer.py
 ```
 
 Para visualizar os logs execute num novo terminal:
@@ -42,9 +42,9 @@ docker-compose ps
 Configure o profile localstack:
 ```bash
 aws configure --profile localstack
-# AWS Access Key ID [local]: 
-# AWS Secret Access Key [local]: 
-# Default region name [us-east-1]: 
+# AWS Access Key ID [local]:
+# AWS Secret Access Key [local]:
+# Default region name [us-east-1]:
 # Default output format [json]:
 ```
 
@@ -141,13 +141,16 @@ kafka-avro-console-producer \
 ## Anotações
 ```bash
 # lista as lambdas
-aws lambda list-functions --endpoint-url http://localhost:4566 --query "Functions[].[FunctionName]"
+aws lambda list-functions \
+--endpoint-url http://localhost:4566 \
+--query "Functions[].[FunctionName]"
 
 # testa comunicação com kafka
 nc -vz localhost 9092
 
 # invoca a lambda criada na automação, dentro do localstack
-curl -XPOST "http://localhost:4566/2015-03-31/functions/consumer-events/invocations" -d '{"nome": "Joao"}'
+curl -XPOST "http://localhost:4566/2015-03-31/functions/consumer-events/invocations" \
+-d '{"nome": "Joao"}'
 
 # mostra o stream dos logs da lambda
 aws logs tail --follow /aws/lambda/consumer-events
