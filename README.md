@@ -7,12 +7,13 @@
 
 POC de conector lambda sink
 
-## Pré requisitos
+## Pré-requisitos
 - docker / docker-compose
 - python
 - aws cli 2.0
 - terraform com [tfenv](https://github.com/tfutils/tfenv) (opcional)
 - terraform-local / [tflocal](https://docs.localstack.cloud/user-guide/integrations/terraform/#install-the-tflocal-wrapper-script) (opcional)
+- [curls](https://curl.se/docs/manpage.html) (debug) (opcional)
 
 ## Executar localmente com a automação
 
