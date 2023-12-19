@@ -87,7 +87,9 @@ curl -XDELETE http://localhost:8083/connectors/connector-consumer-events
 ```
 Cria o conector:
 ```bash
-curl -XPOST -H 'Content-Type: application/json' http://localhost:8083/connectors -d @config/connector-localstack-avro.json
+# comando deve ser executado no diretório ./automation
+curl -XPOST -H 'Content-Type: application/json' http://localhost:8083/connectors \
+-d @config/connector-localstack-avro.json
 ```
 
 Cria eventos para o Kafka via console Kafka:
